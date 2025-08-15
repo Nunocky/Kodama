@@ -1,6 +1,7 @@
 {
   "permissions": {
     "allow": [
+      "Bash(./gradlew:*)",
       "Bash(adb:*)",
       "Bash(cp:*)",
       "Bash(find:*)",
@@ -64,5 +65,9 @@
       "Bash(mysql:*)",
       "Bash(mongod:*)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "serena"
+  ],
+  "enableAllProjectMcpServers": true
 }

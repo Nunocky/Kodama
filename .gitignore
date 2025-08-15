@@ -13,4 +13,7 @@
 .externalNativeBuild
 .cxx
 local.properties
-.serena/
+.serena/cache
+.serena/memories
+**/*.salive
+
