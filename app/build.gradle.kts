@@ -58,6 +58,13 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
+    // [Android Voice Activity Detection](https://github.com/gkonovalov/android-vad)
+    implementation(libs.android.vad.webrtc)
+    implementation(libs.android.vad.silero)
+    implementation(libs.android.vad.yamnet)
+
+    // Test
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
