@@ -4,6 +4,10 @@
       "command": "/Users/nunokawa/.pyenv/shims/uvx",
       "args": ["--from", "git+https://github.com/oraios/serena serena-mcp-server", "--context", "ide-assistant", "--project", "/Users/nunokawa/Desktop/Kodama"],
       "env": {}
-    }
+    },
+    "fetch": {
+      "command": "/Users/nunokawa/.pyenv/shims/uvx",
+      "args": ["mcp-server-fetch"]
+  }
   }
 }
