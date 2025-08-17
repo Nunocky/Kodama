@@ -6,16 +6,17 @@ import com.konovalov.vad.webrtc.config.Mode
 import com.konovalov.vad.webrtc.config.SampleRate
 import java.io.InputStream
 
-class AudioFileInputStream(private val iStream: InputStream) : AudioInputStream() {
+class FileStreamVoiceActivityDetection(private val iStream: InputStream) : AudioInputStream() {
 
     override fun start() {
-        val vad: VadWebRTC = VadWebRTC(
+        val vad = VadWebRTC(
             sampleRate = SampleRate.SAMPLE_RATE_16K,
             frameSize = FrameSize.FRAME_SIZE_320,
             mode = Mode.VERY_AGGRESSIVE,
-            silenceDurationMs = 600,
+            silenceDurationMs = 1000,
             speechDurationMs = 50,
         )
+
         try {
             iStream.use { fis ->
                 val audioHeader = ByteArray(44).apply { fis.read(this) }

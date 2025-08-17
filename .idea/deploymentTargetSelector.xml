@@ -19,6 +19,9 @@
       <SelectionState runConfigName="testFileAudioInputStream()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
+      <SelectionState runConfigName="AudioFileInputStreamTest">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
     </selectionStates>
   </component>
 </project>

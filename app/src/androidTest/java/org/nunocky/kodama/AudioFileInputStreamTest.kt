@@ -23,7 +23,7 @@ class AudioFileInputStreamTest {
         val assetManager = context.assets
         val voiceAssest = assetManager.open("sample_voice01.wav")
 
-        val inputStream = AudioFileInputStream(voiceAssest)
+        val inputStream = FileStreamVoiceActivityDetection(voiceAssest)
 
         var lastSpeech = false
         inputStream.addListener(object : AudioInputStream.Listener() {

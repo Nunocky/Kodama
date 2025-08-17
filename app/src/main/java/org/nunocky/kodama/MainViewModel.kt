@@ -1,10 +1,7 @@
 package org.nunocky.kodama
 
 import android.content.Context
-import android.media.AudioAttributes
 import android.media.AudioFormat
-import android.media.AudioManager
-import android.media.AudioTrack
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,8 +26,8 @@ class AudioPlayUseCase @Inject constructor(
     private val _isSpeaking = MutableStateFlow(false)
     val isSpeaking: StateFlow<Boolean> = _isSpeaking.asStateFlow()
 
-    private var audioFileInputStream: AudioFileInputStream? = null
-    private var audioTrack: AudioTrack? = null
+    private var audioFileInputStream: FileStreamVoiceActivityDetection? = null
+    private var audioPlayStream: AudioPlayStream? = null
     private var playbackJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.IO)
 
@@ -45,44 +42,36 @@ class AudioPlayUseCase @Inject constructor(
                 // AudioFileInputStream オブジェクトを作る
                 // asset/sample_voice01.wavを開く
                 val assetManager = context.assets
-                // val fileFd = assetManager.openFd("sample_voice01.wav")
                 val inputStream = assetManager.open("sample_voice01.wav")
 
-                audioFileInputStream = AudioFileInputStream(inputStream)
+                audioFileInputStream = FileStreamVoiceActivityDetection(inputStream)
 
-                // AudioTrackの初期化 (16kHz, 16bit, Mono)
+                // AudioPlayStream の初期化 (16kHz, 16bit, Mono)
                 val sampleRate = 16000
                 val channelConfig = AudioFormat.CHANNEL_OUT_MONO
                 val audioFormat = AudioFormat.ENCODING_PCM_16BIT
-                val bufferSize = AudioTrack.getMinBufferSize(sampleRate, channelConfig, audioFormat)
 
-                audioTrack = AudioTrack.Builder()
-                    .setAudioAttributes(
-                        AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_MEDIA)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-                            .build()
-                    )
-                    .setAudioFormat(
-                        AudioFormat.Builder()
-                            .setSampleRate(sampleRate)
-                            .setEncoding(audioFormat)
-                            .setChannelMask(channelConfig)
-                            .build()
-                    )
-                    .setBufferSizeInBytes(bufferSize)
-                    .build()
+                audioPlayStream = AudioPlayStreamImpl()
+                if (audioPlayStream?.initialize(sampleRate, channelConfig, audioFormat) != true) {
+                    Log.e("AudioPlayUseCase", "Failed to initialize AudioPlayStream")
+                    _isPlaying.value = false
+                    return@launch
+                }
 
-                audioTrack?.play()
+                // 音声の再生を開始
+                audioPlayStream?.start()
 
                 // VADリスナーを追加
                 audioFileInputStream?.addListener(object : AudioInputStream.Listener() {
                     override fun onFrame(bytes: ByteArray, isSpeech: Boolean) {
-                        Log.d("AudioPlayUseCase", "onFrame: isSpeech=$isSpeech, bytes=${bytes.size}")
+                        Log.d(
+                            "AudioPlayUseCase",
+                            "onFrame: isSpeech=$isSpeech, bytes=${bytes.size}"
+                        )
                         _isSpeaking.value = isSpeech
-                        
-                        // チャンクを音声再生
-                        audioTrack?.write(bytes, 0, bytes.size)
+
+                        // チャンクをAudioStreamで再生
+                        audioPlayStream?.write(bytes, 0, bytes.size)
                     }
                 })
 
@@ -92,21 +81,21 @@ class AudioPlayUseCase @Inject constructor(
                 // AudioFileInputStreamの処理が完了したらisPlayingとisSpeakingをfalseにする
                 _isPlaying.value = false
                 _isSpeaking.value = false
-                
-                // AudioTrackをリソース解放
-                audioTrack?.stop()
-                audioTrack?.release()
-                audioTrack = null
+
+                // AudioPlayStream をリソース解放
+                audioPlayStream?.stop()
+                audioPlayStream?.release()
+                audioPlayStream = null
 
             } catch (e: Exception) {
                 _isPlaying.value = false
                 _isSpeaking.value = false
-                
-                // AudioTrackをリソース解放
-                audioTrack?.stop()
-                audioTrack?.release()
-                audioTrack = null
-                
+
+                // AudioPlayStream をリソース解放
+                audioPlayStream?.stop()
+                audioPlayStream?.release()
+                audioPlayStream = null
+
                 e.printStackTrace()
             }
         }
@@ -121,11 +110,11 @@ class AudioPlayUseCase @Inject constructor(
         playbackJob?.cancel()
         playbackJob = null
 
-        // AudioTrackをリソース解放
-        audioTrack?.stop()
-        audioTrack?.release()
-        audioTrack = null
-        
+        // AudioPlayStreamをリソース解放
+        audioPlayStream?.stop()
+        audioPlayStream?.release()
+        audioPlayStream = null
+
         // AudioFileInputStreamをクリーンアップ
         audioFileInputStream = null
     }
