@@ -14,6 +14,7 @@ class MainViewModel @Inject constructor(
 ) : ViewModel() {
 
     val isSpeaking: StateFlow<Boolean> = audioPlayUseCase.isSpeaking
+    val isPlaying: StateFlow<Boolean> = audioPlayUseCase.isPlaying
 
     private val _isMicInputEnabled = MutableStateFlow(false)
     val isMicInputEnabled: StateFlow<Boolean> = _isMicInputEnabled.asStateFlow()

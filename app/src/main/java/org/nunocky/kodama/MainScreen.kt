@@ -23,6 +23,7 @@ fun MainScreen(
     viewModel: MainViewModel = hiltViewModel()
 ) {
     val isSpeaking by viewModel.isSpeaking.collectAsState()
+    val isPlaying by viewModel.isPlaying.collectAsState()
     val isMicInputEnabled = viewModel.isMicInputEnabled.collectAsState(initial = false).value
 
     KodamaTheme {
@@ -40,7 +41,11 @@ fun MainScreen(
 
                 // 会話状態の表示
                 Text(
-                    text = if (isSpeaking) "会話中" else "停止中",
+                    text = when {
+                        isPlaying -> "再生中（マイク一時停止）"
+                        isSpeaking -> "会話中"
+                        else -> "停止中"
+                    },
                     modifier = Modifier.padding(top = 16.dp)
                 )
             }

@@ -24,6 +24,9 @@ class AudioPlayUseCase @Inject constructor(
 ) {
     private val _isSpeaking = MutableStateFlow(false)
     val isSpeaking: StateFlow<Boolean> = _isSpeaking.asStateFlow()
+    
+    private val _isPlaying = MutableStateFlow(false)
+    val isPlaying: StateFlow<Boolean> = _isPlaying.asStateFlow()
 
     private val scope = CoroutineScope(Dispatchers.IO)
     private var micStreamVAD: MicStreamVoiceActivityDetection? = null
@@ -36,9 +39,20 @@ class AudioPlayUseCase @Inject constructor(
 
     // 追加: 再生用
     private var mediaPlayer: android.media.MediaPlayer? = null
+    
+    // 追加: マイク一時停止制御用
+    private var isMicTemporarilyPaused = false
+    private var wasUserMicEnabled = false
 
     fun startMicInput() {
         if (micStreamVAD != null) return
+        
+        // 一時停止中の場合は復帰処理
+        if (isMicTemporarilyPaused) {
+            wasUserMicEnabled = true
+            return
+        }
+        
         audioRecorder = AudioRecorder(context)
         micStreamVAD = MicStreamVoiceActivityDetection(scope, { bytes, isSpeech ->
             // isSpeaking状態変化検知
@@ -71,12 +85,50 @@ class AudioPlayUseCase @Inject constructor(
         mediaPlayer?.release()
         mediaPlayer = android.media.MediaPlayer().apply {
             setDataSource(wavFile.absolutePath)
-            setOnPreparedListener { start() }
+            setOnPreparedListener { 
+                // 再生開始前にマイクを一時停止
+                pauseMicTemporarily()
+                _isPlaying.value = true
+                start() 
+            }
             setOnCompletionListener {
+                // 再生完了時にマイクを復帰
+                _isPlaying.value = false
+                resumeMicIfNeeded()
                 release()
                 mediaPlayer = null
             }
+            setOnErrorListener { _, _, _ ->
+                // エラー時もマイクを復帰
+                _isPlaying.value = false
+                resumeMicIfNeeded()
+                release()
+                mediaPlayer = null
+                true
+            }
             prepareAsync()
+        }
+    }
+    
+    // 追加: マイクの一時停止
+    private fun pauseMicTemporarily() {
+        if (micStreamVAD != null && !isMicTemporarilyPaused) {
+            wasUserMicEnabled = true
+            isMicTemporarilyPaused = true
+            micStreamVAD?.stop()
+            micStreamVAD = null
+            _isSpeaking.value = false
+            audioRecorder?.stopRecording()
+            audioRecorder = null
+            lastSpeakingState = false
+        }
+    }
+    
+    // 追加: 必要に応じてマイクを復帰
+    private fun resumeMicIfNeeded() {
+        if (isMicTemporarilyPaused && wasUserMicEnabled) {
+            isMicTemporarilyPaused = false
+            startMicInput()
         }
     }
 
@@ -87,7 +139,13 @@ class AudioPlayUseCase @Inject constructor(
         audioRecorder?.stopRecording()
         audioRecorder = null
         lastSpeakingState = false
+        
+        // 一時停止状態もリセット
+        isMicTemporarilyPaused = false
+        wasUserMicEnabled = false
+        
         // 追加: MediaPlayerリソース解放
+        _isPlaying.value = false
         mediaPlayer?.release()
         mediaPlayer = null
     }
