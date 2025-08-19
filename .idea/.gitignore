@@ -1,3 +1,7 @@
 # Default ignored files
 /shelf/
 /workspace.xml
+/appInsightsSettings.xml
+/deploymentTargetSelector.xml
+/saveactions_settings.xml
+/copilotDiffState.xml
