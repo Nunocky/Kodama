@@ -1,4 +1,4 @@
-package org.nunocky.kodama
+package org.nunocky.kodama.audio
 
 import android.content.Context
 import java.io.File

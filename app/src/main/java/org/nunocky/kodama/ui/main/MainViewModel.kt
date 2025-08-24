@@ -1,4 +1,4 @@
-package org.nunocky.kodama
+package org.nunocky.kodama.ui.main
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel

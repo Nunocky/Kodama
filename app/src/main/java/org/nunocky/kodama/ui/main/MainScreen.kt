@@ -1,13 +1,8 @@
-package org.nunocky.kodama
+package org.nunocky.kodama.ui.main
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.unit.dp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -15,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.nunocky.kodama.ui.theme.KodamaTheme
 
@@ -24,7 +20,7 @@ fun MainScreen(
 ) {
     val isSpeaking by viewModel.isSpeaking.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
-    val isMicInputEnabled = viewModel.isMicInputEnabled.collectAsState(initial = false).value
+    val isMicInputEnabled by viewModel.isMicInputEnabled.collectAsState(initial = false)
 
     KodamaTheme {
         Scaffold(modifier = Modifier.Companion.fillMaxSize()) { innerPadding ->

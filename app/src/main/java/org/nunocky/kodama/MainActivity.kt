@@ -10,6 +10,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import dagger.hilt.android.AndroidEntryPoint
+import org.nunocky.kodama.ui.main.MainScreen
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

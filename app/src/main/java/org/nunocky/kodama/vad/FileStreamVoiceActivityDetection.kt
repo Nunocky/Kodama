@@ -1,12 +1,14 @@
-package org.nunocky.kodama
+package org.nunocky.kodama.vad
 
 import com.konovalov.vad.webrtc.VadWebRTC
 import com.konovalov.vad.webrtc.config.FrameSize
 import com.konovalov.vad.webrtc.config.Mode
 import com.konovalov.vad.webrtc.config.SampleRate
+import org.nunocky.kodama.audio.parseWavHeader
 import java.io.InputStream
 
-class FileStreamVoiceActivityDetection(private val iStream: InputStream) : AudioInputStream() {
+class FileStreamVoiceActivityDetection(private val iStream: InputStream) :
+    VoiceActivityDetectionInterface() {
 
     override fun start() {
         val vad = VadWebRTC(
@@ -20,10 +22,9 @@ class FileStreamVoiceActivityDetection(private val iStream: InputStream) : Audio
         try {
             iStream.use { fis ->
                 val audioHeader = ByteArray(44).apply { fis.read(this) }
-                // val speechData = byteArrayOf()
-
-                // 16bitサンプリングを想定 (TODO あとで直す)
-                val chunkSize = vad.frameSize.value * 2
+                val wavInfo = parseWavHeader(audioHeader)
+                // val chunkSize = vad.frameSize.value * 2 // 16bitサンプリングを想定
+                val chunkSize = vad.frameSize.value * wavInfo.bytesPerSample * wavInfo.channels
 
                 while (fis.available() > 0) {
                     val frameChunk = ByteArray(chunkSize).apply { fis.read(this) }
@@ -31,7 +32,7 @@ class FileStreamVoiceActivityDetection(private val iStream: InputStream) : Audio
                     val isSpeech = vad.isSpeech(frameChunk)
 
                     for (l in listener) {
-                        l.onFrame(frameChunk, isSpeech)
+                        l.invoke(frameChunk, isSpeech)
                     }
                 }
             }

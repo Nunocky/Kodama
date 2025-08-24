@@ -6,6 +6,8 @@ import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.nunocky.kodama.vad.VoiceActivityDetectionInterface
+import org.nunocky.kodama.vad.FileStreamVoiceActivityDetection
 
 
 @RunWith(AndroidJUnit4::class)
@@ -26,7 +28,7 @@ class AudioFileInputStreamTest {
         val inputStream = FileStreamVoiceActivityDetection(voiceAssest)
 
         var lastSpeech = false
-        inputStream.addListener(object : AudioInputStream.Listener() {
+        inputStream.addListener(object : VoiceActivityDetectionInterface.Listener() {
             override fun onFrame(bytes: ByteArray, isSpeech: Boolean) {
                 if (isSpeech != lastSpeech) {
                     Log.d("TEST", "onFrame: isSpeech=$isSpeech")
