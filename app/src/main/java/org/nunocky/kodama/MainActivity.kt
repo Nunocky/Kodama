@@ -10,31 +10,30 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import dagger.hilt.android.AndroidEntryPoint
-import org.nunocky.kodama.ui.main.MainScreen
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    
+
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         // Handle permission results if needed
     }
-    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        
+
         checkAndRequestPermissions()
-        
+
         setContent {
-            MainScreen()
+            MyAppRouting()
         }
     }
-    
+
     private fun checkAndRequestPermissions() {
         val permissionsToRequest = mutableListOf<String>()
-        
+
         // RECORD_AUDIO permission
         if (ContextCompat.checkSelfPermission(
                 this,
@@ -43,7 +42,7 @@ class MainActivity : ComponentActivity() {
         ) {
             permissionsToRequest.add(Manifest.permission.RECORD_AUDIO)
         }
-        
+
         // Storage permissions based on Android version
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             // Android 13+ - use READ_MEDIA_AUDIO
@@ -63,7 +62,7 @@ class MainActivity : ComponentActivity() {
             ) {
                 permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
             }
-            
+
             if (ContextCompat.checkSelfPermission(
                     this,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -72,10 +71,9 @@ class MainActivity : ComponentActivity() {
                 permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             }
         }
-        
+
         if (permissionsToRequest.isNotEmpty()) {
             requestPermissionLauncher.launch(permissionsToRequest.toTypedArray())
         }
     }
 }
-

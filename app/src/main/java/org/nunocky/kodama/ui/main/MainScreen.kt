@@ -1,48 +1,94 @@
 package org.nunocky.kodama.ui.main
 
+import android.content.Context
+import android.graphics.ImageDecoder
+import android.graphics.drawable.AnimatedImageDrawable
+import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.nunocky.kodama.ui.theme.KodamaTheme
+import org.nunocky.kodama.usecase.VoiceInputState
+
+fun createAnimatedImageDrawableFromImageDecoder(
+    context: Context,
+    uri: Uri
+): AnimatedImageDrawable {
+    val source = ImageDecoder.createSource(context.contentResolver, uri)
+    val drawable = ImageDecoder.decodeDrawable(source)
+    return drawable as AnimatedImageDrawable
+}
 
 @Composable
 fun MainScreen(
-    viewModel: MainViewModel = hiltViewModel()
+    viewModel: MainViewModel = hiltViewModel(),
+    onBack: () -> Unit = { },
 ) {
-    val isSpeaking by viewModel.isSpeaking.collectAsState()
-    val isPlaying by viewModel.isPlaying.collectAsState()
-    val isMicInputEnabled by viewModel.isMicInputEnabled.collectAsState(initial = false)
+    // マイクの有効・無効
+    val isMicActive by viewModel.isMicActive.collectAsState()
+
+    // 現在の音声処理状態
+    val voiceInputState by viewModel.voiceInputState.collectAsState()
+
+    // UI操作が可能かどうか
+    val canUseUI = voiceInputState == VoiceInputState.UNVOICING
 
     KodamaTheme {
+        BackHandler {
+            onBack()
+        }
+
         Scaffold(modifier = Modifier.Companion.fillMaxSize()) { innerPadding ->
             Column(modifier = Modifier.padding(innerPadding)) {
-                // マイク入力切替スイッチ
-                Switch(
-                    checked = isMicInputEnabled,
-                    onCheckedChange = { checked ->
-                        viewModel.setMicInputEnabled(checked)
-                    },
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
-                Text(text = if (isMicInputEnabled) "マイク入力ON" else "マイク入力OFF")
 
-                // 会話状態の表示
+                Spacer(modifier = Modifier.Companion.padding(vertical = 8.dp))
+
+                HorizontalDivider(
+                    Modifier.padding(vertical = 8.dp),
+                    DividerDefaults.Thickness,
+                    DividerDefaults.color,
+                )
+
+                // マイク入力
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = CenterVertically,
+                ) {
+                    Text(text = "マイク入力 : ${if (isMicActive) "ON" else "OFF"}")
+                    Spacer(modifier = Modifier.weight(1f))
+                    Switch(
+                        checked = isMicActive,
+                        onCheckedChange = { checked ->
+                            viewModel.onMicActiveChanged(checked)
+                        },
+                    )
+                }
+
+                // 音声入力の状態
                 Text(
-                    text = when {
-                        isPlaying -> "再生中（マイク一時停止）"
-                        isSpeaking -> "会話中"
-                        else -> "停止中"
-                    },
-                    modifier = Modifier.padding(top = 16.dp)
+                    text = "音声入力の状態: ${
+                        when (voiceInputState) {
+                            VoiceInputState.UNVOICING -> "待機中"
+                            VoiceInputState.VOICING -> "発話中"
+                            VoiceInputState.PLAYING -> "再生中"
+                        }
+                    }"
                 )
             }
         }

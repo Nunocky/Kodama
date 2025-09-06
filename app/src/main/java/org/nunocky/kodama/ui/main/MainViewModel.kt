@@ -1,30 +1,29 @@
 package org.nunocky.kodama.ui.main
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import dagger.hilt.android.qualifiers.ApplicationContext
+import org.nunocky.kodama.usecase.VoiceInputUseCase
 import javax.inject.Inject
 
+private const val TAG = "MainViewModel"
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val audioPlayUseCase: AudioPlayUseCase
+    @param:ApplicationContext private val context: Context,
+    private val voiceInputUseCase: VoiceInputUseCase,
 ) : ViewModel() {
+    // 音声入力の状態
+    val voiceInputState = voiceInputUseCase.state
+    val isMicActive = voiceInputUseCase.micInputRequested
 
-    val isSpeaking: StateFlow<Boolean> = audioPlayUseCase.isSpeaking
-    val isPlaying: StateFlow<Boolean> = audioPlayUseCase.isPlaying
+    fun onMicActiveChanged(active: Boolean) {
+        voiceInputUseCase.requestMicInput(active)
+    }
 
-    private val _isMicInputEnabled = MutableStateFlow(false)
-    val isMicInputEnabled: StateFlow<Boolean> = _isMicInputEnabled.asStateFlow()
-
-    fun setMicInputEnabled(enabled: Boolean) {
-        _isMicInputEnabled.value = enabled
-        if (enabled) {
-            audioPlayUseCase.startMicInput()
-        } else {
-            audioPlayUseCase.stopMicInput()
-        }
+    override fun onCleared() {
+        voiceInputUseCase.requestMicInput(false)
+        super.onCleared()
     }
 }

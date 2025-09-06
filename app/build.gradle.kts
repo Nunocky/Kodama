@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.serialization)
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -46,6 +47,7 @@ android {
 
 dependencies {
     implementation(libs.dagger.hilt.android)
+    implementation(libs.firebase.functions)
     ksp(libs.dagger.hilt.android.compiler)
     ksp(libs.androidx.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)

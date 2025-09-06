@@ -17,6 +17,8 @@ hiltCompiler = "1.2.0"
 hiltNavigationCompose = "1.2.0"
 navigationCompose = "2.9.3"
 androidVad = "2.0.10"
+googleGmsGoogleServices = "4.4.3"
+firebaseFunctions = "22.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -44,6 +46,7 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 android-vad-webrtc = { module = "com.github.gkonovalov.android-vad:webrtc", version.ref = "androidVad" }
 android-vad-silero = { module = "com.github.gkonovalov.android-vad:silero", version.ref = "androidVad" }
 android-vad-yamnet = { module = "com.github.gkonovalov.android-vad:yamnet", version.ref = "androidVad" }
+firebase-functions = { group = "com.google.firebase", name = "firebase-functions", version.ref = "firebaseFunctions" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -52,3 +55,4 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hiltAndroid" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "serialization" }
+google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }

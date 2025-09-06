@@ -36,24 +36,21 @@ class PcmToWavConverter {
     ) {
         val byteRate = sampleRate * channels * bitsPerSample / 8
         val header = ByteArray(44)
-
         // RIFF header
-        header[0] = 'R'.code.toByte()
-        header[1] = 'I'.code.toByte()
-        header[2] = 'F'.code.toByte()
+        header[0] = 'R'.code.toByte();
+        header[1] = 'I'.code.toByte();
+        header[2] = 'F'.code.toByte();
         header[3] = 'F'.code.toByte()
         val totalDataLen = pcmSize + 36
         writeInt(header, 4, totalDataLen)
-
-        header[8] = 'W'.code.toByte()
-        header[9] = 'A'.code.toByte()
-        header[10] = 'V'.code.toByte()
+        header[8] = 'W'.code.toByte();
+        header[9] = 'A'.code.toByte();
+        header[10] = 'V'.code.toByte();
         header[11] = 'E'.code.toByte()
-
         // fmt chunk
-        header[12] = 'f'.code.toByte()
-        header[13] = 'm'.code.toByte()
-        header[14] = 't'.code.toByte()
+        header[12] = 'f'.code.toByte();
+        header[13] = 'm'.code.toByte();
+        header[14] = 't'.code.toByte();
         header[15] = ' '.code.toByte()
         writeInt(header, 16, 16) // Subchunk1Size
         writeShort(header, 20, 1) // AudioFormat (PCM)
@@ -62,11 +59,10 @@ class PcmToWavConverter {
         writeInt(header, 28, byteRate)
         writeShort(header, 32, channels * bitsPerSample / 8)
         writeShort(header, 34, bitsPerSample)
-
         // data chunk
-        header[36] = 'd'.code.toByte()
-        header[37] = 'a'.code.toByte()
-        header[38] = 't'.code.toByte()
+        header[36] = 'd'.code.toByte();
+        header[37] = 'a'.code.toByte();
+        header[38] = 't'.code.toByte();
         header[39] = 'a'.code.toByte()
         writeInt(header, 40, pcmSize)
         out.write(header, 0, 44)
