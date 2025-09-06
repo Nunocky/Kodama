@@ -3,6 +3,7 @@ package org.nunocky.kodama.usecase
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -126,6 +127,7 @@ class VoiceInputUseCase @Inject constructor(
      * マイク入力停止
      */
     private fun stopMicInput() {
+        Logger.d(TAG, "stopMicInput")
         voiceActivityDetector?.listener = null
         voiceActivityDetector?.stop()
         voiceActivityDetector = null
@@ -167,6 +169,7 @@ class VoiceInputUseCase @Inject constructor(
                 when (currentState) {
                     VoiceInputState.UNVOICING -> {
                         if (requestPending) {
+                            delay(300L)
                             startMicInput()
                         } else {
                             stopMicInput()

@@ -25,14 +25,14 @@ class AudioPlayer @Inject constructor(
                 start()
             }
             setOnCompletionListener {
-                listener?.onComplete()
                 release()
+                listener?.onComplete()
                 mediaPlayer = null
             }
             setOnErrorListener { _, _, _ ->
-                listener?.onError()
                 release()
                 mediaPlayer = null
+                listener?.onError()
                 true
             }
             prepareAsync()
