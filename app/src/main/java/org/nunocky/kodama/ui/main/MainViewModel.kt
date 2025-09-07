@@ -16,7 +16,7 @@ class MainViewModel @Inject constructor(
 ) : ViewModel() {
     // 音声入力の状態
     val voiceInputState = voiceInputUseCase.state
-    val isMicActive = voiceInputUseCase.micInputRequested
+    val isMicActive = voiceInputUseCase.micOnPendingRequest
 
     fun onMicActiveChanged(active: Boolean) {
         voiceInputUseCase.requestMicInput(active)

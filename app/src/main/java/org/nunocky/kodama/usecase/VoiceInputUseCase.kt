@@ -52,11 +52,11 @@ class VoiceInputUseCase @Inject constructor(
     private var voiceActivityDetector: VoiceActivityDetector? = null
 
     // マイクの ON/OFF は、ユースケースの状態変化のときにこの値をみて判断する
-    private var _requestMicInputPending = MutableStateFlow(false)
-    val micInputRequested = _requestMicInputPending.asStateFlow()
+    private var _micOnPendingRequest = MutableStateFlow(false)
+    val micOnPendingRequest = _micOnPendingRequest.asStateFlow()
 
     fun requestMicInput(enable: Boolean) {
-        _requestMicInputPending.value = enable
+        _micOnPendingRequest.value = enable
     }
 
     /**
@@ -155,20 +155,20 @@ class VoiceInputUseCase @Inject constructor(
         // マイクのON/OFFを状態とリクエストに応じて制御する
         scope.launch {
             combine(
-                _requestMicInputPending,
+                _micOnPendingRequest,
                 _state,
             ) { requestPending, currentState ->
                 // トリプルとして値を保持
                 Pair(requestPending, currentState)
-            }.collect { (requestPending, currentState) ->
+            }.collect { (micOnPendingRequest, currentState) ->
                 Logger.d(
                     TAG,
-                    "Mic Control: requestPending=$requestPending, currentState=$currentState"
+                    "Mic Control: requestPending=$micOnPendingRequest, currentState=$currentState"
                 )
 
                 when (currentState) {
                     VoiceInputState.UNVOICING -> {
-                        if (requestPending) {
+                        if (micOnPendingRequest) {
                             delay(300L)
                             startMicInput()
                         } else {
